@@ -1,5 +1,6 @@
 package com.dhyegopedroso.workshopmongo.repository;
 
+import java.util.Date;
 import java.util.List;
 
 import org.springframework.data.mongodb.repository.MongoRepository;
@@ -11,10 +12,16 @@ import com.dhyegopedroso.workshopmongo.domain.Post;
 @Repository
 public interface PostRepository extends MongoRepository<Post, String> {
 
-	
 	List<Post> findByTituloContainingIgnoreCase(String text);
-	
+
 	@Query("{ 'titulo': { $regex: ?0, $options: 'i' } }")
 	List<Post> searchTitulo(String text);
-	
+
+	@Query("{ $and: [ { date: {$gte: ?1}  }, { date: { $lte: ?2} } , "
+			+ " { $or: [ "
+			+ " { 'titulo': { $regex: ?0, $options: 'i' } }, "
+			+ " { 'body': { $regex: ?0, $options: 'i' } }, "
+			+ " { 'comments.text': { $regex: ?0, $options: 'i' } } ] } ] }")
+	List<Post> fullSearch(String text, Date minDate, Date maxDate);
+
 }
